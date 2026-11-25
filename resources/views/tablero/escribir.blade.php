@@ -101,21 +101,31 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Columna General -->
             <section class="bg-slate-900/75 backdrop-blur-md border border-amber-500/30 p-6 rounded-2xl shadow-xl">
-                <div class="flex items-center gap-2.5 border-b border-slate-800 pb-4 mb-5">
-                    <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)]"></span>
-                    <h3 class="font-bold text-lg tracking-wide text-amber-400">INFORMACIÓN GENERAL (FIJA)</h3>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)]"></span>
+                        <h3 class="font-bold text-lg tracking-wide text-amber-400">INFORMACIÓN GENERAL (FIJA)</h3>
+                    </div>
+                    <span class="text-[11px] text-slate-500">Clic para editar</span>
                 </div>
 
                 <div class="space-y-3">
                     @forelse($generales as $item)
-                        <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-4 rounded-xl border-l-4 border-l-amber-400 flex justify-between items-start gap-3 transition-all duration-200 shadow-md">
+                        <div onclick="abrirModalEditar(this)"
+                             data-id="{{ $item->id }}"
+                             data-titulo="{{ $item->titulo }}"
+                             data-contenido="{{ $item->contenido }}"
+                             data-tipo="general"
+                             data-fecha=""
+                             title="Haz clic para editar"
+                             class="group cursor-pointer bg-slate-950/70 hover:bg-slate-900/90 border border-slate-800/80 hover:border-amber-500/40 p-4 rounded-xl border-l-4 border-l-amber-400 flex justify-between items-start gap-3 transition-all duration-200 shadow-md">
                             <div class="min-w-0 flex-1">
                                 @if($item->titulo)
-                                    <p class="font-bold text-amber-300 text-base mb-1">{{ $item->titulo }}</p>
+                                    <p class="font-bold text-amber-300 group-hover:text-amber-200 text-base mb-1 transition-colors">{{ $item->titulo }}</p>
                                 @endif
                                 <p class="text-sm text-slate-200 whitespace-pre-line leading-relaxed">{{ $item->contenido }}</p>
                             </div>
-                            <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" class="shrink-0">
+                            <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" onclick="event.stopPropagation()" class="shrink-0">
                                 @csrf @method('DELETE')
                                 <button type="submit"
                                         class="inline-flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/50 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer">
@@ -150,14 +160,21 @@
 
                 <div class="space-y-3">
                     @forelse($porFecha as $item)
-                        <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-4 rounded-xl border-l-4 border-l-indigo-400 flex justify-between items-start gap-3 transition-all duration-200 shadow-md">
+                        <div onclick="abrirModalEditar(this)"
+                             data-id="{{ $item->id }}"
+                             data-titulo="{{ $item->titulo }}"
+                             data-contenido="{{ $item->contenido }}"
+                             data-tipo="fecha"
+                             data-fecha="{{ $item->fecha }}"
+                             title="Haz clic para editar"
+                             class="group cursor-pointer bg-slate-950/70 hover:bg-slate-900/90 border border-slate-800/80 hover:border-indigo-500/40 p-4 rounded-xl border-l-4 border-l-indigo-400 flex justify-between items-start gap-3 transition-all duration-200 shadow-md">
                             <div class="min-w-0 flex-1">
                                 @if($item->titulo)
-                                    <p class="font-bold text-indigo-300 text-base mb-1">{{ $item->titulo }}</p>
+                                    <p class="font-bold text-indigo-300 group-hover:text-indigo-200 text-base mb-1 transition-colors">{{ $item->titulo }}</p>
                                 @endif
                                 <p class="text-sm text-slate-200 whitespace-pre-line leading-relaxed">{{ $item->contenido }}</p>
                             </div>
-                            <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" class="shrink-0">
+                            <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" onclick="event.stopPropagation()" class="shrink-0">
                                 @csrf @method('DELETE')
                                 <button type="submit"
                                         class="inline-flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/50 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer">
@@ -181,12 +198,124 @@
         </div>
     </div>
 
+    <!-- Ventana Emergente (Modal) de Edición -->
+    <div id="modalEditar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-xl p-6 relative">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.6)]"></span>
+                    <h3 class="text-lg font-bold tracking-wide text-slate-100">Editar Mensaje del Tablero</h3>
+                </div>
+                <button type="button" onclick="cerrarModalEditar()" class="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="formEditar" method="POST" class="space-y-5">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="editTipo" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
+                            Tipo de Información
+                        </label>
+                        <select name="tipo" id="editTipo" onchange="toggleEditFecha()"
+                                class="w-full bg-slate-950/80 hover:bg-slate-950 border border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 text-slate-100 rounded-xl px-3.5 py-2.5 text-sm transition-all outline-none cursor-pointer">
+                            <option value="fecha">Por Fecha (Solo ese día)</option>
+                            <option value="general">General (Fija / Permanente)</option>
+                        </select>
+                    </div>
+
+                    <div id="editCampoFecha">
+                        <label for="editFecha" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
+                            Fecha a mostrar
+                        </label>
+                        <input type="date" name="fecha" id="editFecha"
+                               class="w-full bg-slate-950/80 hover:bg-slate-950 border border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 text-slate-100 rounded-xl px-3.5 py-2.5 text-sm transition-all outline-none cursor-pointer [color-scheme:dark]">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editTitulo" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
+                        Título
+                    </label>
+                    <input type="text" name="titulo" id="editTitulo" placeholder="Ej. Turno mañana / Aviso"
+                           class="w-full bg-slate-950/80 hover:bg-slate-950 border border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 text-slate-100 placeholder-slate-500 rounded-xl px-3.5 py-2.5 text-sm transition-all outline-none">
+                </div>
+
+                <div>
+                    <label for="editContenido" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
+                        Contenido
+                    </label>
+                    <textarea name="contenido" id="editContenido" rows="4" required
+                              class="w-full bg-slate-950/80 hover:bg-slate-950 border border-slate-700/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 text-sm leading-relaxed transition-all outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="cerrarModalEditar()"
+                            class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/25 border border-blue-400/30 transition-all duration-200 cursor-pointer">
+                        <span>Guardar Cambios</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function toggleFecha() {
             const tipo = document.getElementById('tipoSelector').value;
             document.getElementById('campoFecha').style.display = (tipo === 'general') ? 'none' : 'block';
         }
         toggleFecha();
+
+        const modalEditar = document.getElementById('modalEditar');
+        const formEditar = document.getElementById('formEditar');
+        const editTipo = document.getElementById('editTipo');
+        const editFecha = document.getElementById('editFecha');
+        const editCampoFecha = document.getElementById('editCampoFecha');
+        const editTitulo = document.getElementById('editTitulo');
+        const editContenido = document.getElementById('editContenido');
+
+        function toggleEditFecha() {
+            editCampoFecha.style.display = (editTipo.value === 'general') ? 'none' : 'block';
+        }
+
+        function abrirModalEditar(elemento) {
+            const id = elemento.dataset.id;
+            formEditar.action = `{{ url('/tablero/actualizar') }}/${id}`;
+
+            editTitulo.value = elemento.dataset.titulo || '';
+            editContenido.value = elemento.dataset.contenido || '';
+            editTipo.value = elemento.dataset.tipo || 'fecha';
+            editFecha.value = elemento.dataset.fecha || '{{ $fechaSeleccionada }}';
+
+            toggleEditFecha();
+
+            modalEditar.classList.remove('hidden');
+            modalEditar.classList.add('flex');
+        }
+
+        function cerrarModalEditar() {
+            modalEditar.classList.add('hidden');
+            modalEditar.classList.remove('flex');
+        }
+
+        modalEditar.addEventListener('click', (e) => {
+            if (e.target === modalEditar) cerrarModalEditar();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modalEditar.classList.contains('hidden')) {
+                cerrarModalEditar();
+            }
+        });
     </script>
 </body>
 </html>

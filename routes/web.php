@@ -13,3 +13,6 @@ Route::get('/tablero/mostrar', [TableroController::class, 'mostrar'])->name('tab
 
 // Endpoint JSON para refrescar los datos sin recargar la página
 Route::get('/tablero/datos', [TableroController::class, 'obtenerDatos'])->name('tablero.datos');
+
+//Editar el Tablero
+Route::put('/tablero/actualizar/{id}', [TableroController::class, 'actualizar'])->name('tablero.actualizar');

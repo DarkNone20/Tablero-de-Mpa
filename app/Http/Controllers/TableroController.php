@@ -78,4 +78,25 @@ class TableroController extends Controller
             'hora'      => now()->format('h:i:s A'),
         ]);
     }
+
+    public function actualizar(Request $request, $id)
+    {
+        $request->validate([
+            'titulo'    => 'nullable|string|max:150',
+            'contenido' => 'required|string',
+            'tipo'      => 'required|in:general,fecha',
+            'fecha'     => 'required_if:tipo,fecha|nullable|date',
+        ]);
+
+        $nota = TableroNota::findOrFail($id);
+
+        $nota->update([
+            'titulo'    => $request->titulo,
+            'contenido' => $request->contenido,
+            'tipo'      => $request->tipo,
+            'fecha'     => $request->tipo === 'fecha' ? $request->fecha : null,
+        ]);
+
+        return back()->with('success', 'Información actualizada correctamente.');
+    }
 }
