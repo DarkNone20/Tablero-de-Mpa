@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('titulo')->nullable();
             $table->text('contenido');
-            $table->enum('tipo', ['general', 'fecha'])->default('fecha');
-            $table->date('fecha')->nullable(); // Solo se llena si tipo == 'fecha'
+            $table->string('tipo', 50)->default('fecha');
+            $table->date('fecha')->nullable();
             $table->timestamps();
         });
     }

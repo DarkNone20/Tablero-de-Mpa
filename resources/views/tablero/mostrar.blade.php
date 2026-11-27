@@ -68,13 +68,30 @@
             </section>
 
         </div>
+
+        <!-- Bloque 3: Pruebas de Software (Oculto automáticamente cuando no hay pruebas en la fecha) -->
+        <section id="seccionPruebasSoftware" class="hidden mt-4 sm:mt-6 bg-slate-900/75 backdrop-blur-md border border-emerald-500/30 rounded-2xl p-4 sm:p-6 shadow-xl min-w-0">
+            <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-3 sm:pb-4 mb-4 sm:mb-5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)] shrink-0"></span>
+                    <h2 class="text-base sm:text-lg xl:text-xl font-bold tracking-wide text-emerald-400 truncate">PRUEBAS DE SOFTWARE</h2>
+                </div>
+                <span id="etiquetaFechaPruebas" class="bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 px-3 py-1 rounded-full text-xs sm:text-sm font-mono font-semibold shadow-sm shrink-0">
+                    {{ $fechaSeleccionada }}
+                </span>
+            </div>
+            <div id="contenedorPruebasSoftware" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-start"></div>
+        </section>
     </div>
 
     <script>
         const inputFecha = document.getElementById('filtroFecha');
         const contenedorGeneral = document.getElementById('contenedorGeneral');
         const contenedorFecha = document.getElementById('contenedorFecha');
+        const seccionPruebasSoftware = document.getElementById('seccionPruebasSoftware');
+        const contenedorPruebasSoftware = document.getElementById('contenedorPruebasSoftware');
         const etiquetaFecha = document.getElementById('etiquetaFecha');
+        const etiquetaFechaPruebas = document.getElementById('etiquetaFechaPruebas');
         const ultimaHora = document.getElementById('ultimaHora');
 
         function escapeHTML(str) {
@@ -87,6 +104,7 @@
         async function actualizarTablero() {
             const fecha = inputFecha.value;
             etiquetaFecha.textContent = fecha;
+            etiquetaFechaPruebas.textContent = fecha;
 
             try {
                 const response = await fetch(`{{ route('tablero.datos') }}?fecha=${fecha}`);
@@ -119,6 +137,19 @@
                     contenedorFecha.innerHTML = data.porFecha.map(item => `
                         <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl border-l-4 border-l-indigo-400 transition-all duration-200 shadow-md overflow-hidden">
                             ${item.titulo ? `<h3 class="font-bold text-indigo-300 mb-1.5 text-sm sm:text-base xl:text-lg break-words">${escapeHTML(item.titulo)}</h3>` : ''}
+                            <p class="text-slate-200 whitespace-pre-line text-xs sm:text-sm xl:text-base leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
+                        </div>
+                    `).join('');
+                }
+
+                // Renderizar Pruebas de Software (solo se muestra si hay registros para esa fecha)
+                if (!data.pruebasSoftware || data.pruebasSoftware.length === 0) {
+                    seccionPruebasSoftware.classList.add('hidden');
+                    contenedorPruebasSoftware.innerHTML = '';
+                } else {
+                    seccionPruebasSoftware.classList.remove('hidden');
+                    contenedorPruebasSoftware.innerHTML = data.pruebasSoftware.map(item => `
+                        <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl border-l-4 border-l-emerald-400 transition-all duration-200 shadow-md overflow-hidden">
                             <p class="text-slate-200 whitespace-pre-line text-xs sm:text-sm xl:text-base leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
                         </div>
                     `).join('');
