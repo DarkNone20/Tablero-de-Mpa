@@ -9,7 +9,7 @@ class TableroController extends Controller
 {
     public function escribir(Request $request)
     {
-        $fechaSeleccionada = $request->input('fecha', now()->toDateString());
+        $fechaSeleccionada =$request->input('fecha', now()->toDateString());
 
         $generales = TableroNota::where('tipo', 'general')
             ->latest()
@@ -38,16 +38,16 @@ class TableroController extends Controller
         ]);
 
         TableroNota::create([
-            'titulo'    => $request->tipo === 'pruebas_software' ? null : $request->titulo,
+            'titulo'    => $request->titulo,
             'contenido' => $request->contenido,
             'tipo'      => $request->tipo,
-            'fecha'     => in_array($request->tipo, ['fecha', 'pruebas_software']) ? $request->fecha : null,
+            'fecha'     => in_array($request->tipo, ['fecha', 'pruebas_software']) ?$request->fecha : null,
         ]);
 
         return back()->with('success', 'Información agregada al tablero.');
     }
 
-    public function actualizar(Request $request, $id)
+    public function actualizar(Request $request,$id)
     {
         $request->validate([
             'titulo'    => 'nullable|string|max:150',
@@ -59,10 +59,10 @@ class TableroController extends Controller
         $nota = TableroNota::findOrFail($id);
 
         $nota->update([
-            'titulo'    => $request->tipo === 'pruebas_software' ? null : $request->titulo,
+            'titulo'    => $request->titulo,
             'contenido' => $request->contenido,
             'tipo'      => $request->tipo,
-            'fecha'     => in_array($request->tipo, ['fecha', 'pruebas_software']) ? $request->fecha : null,
+            'fecha'     => in_array($request->tipo, ['fecha', 'pruebas_software']) ?$request->fecha : null,
         ]);
 
         return back()->with('success', 'Información actualizada correctamente.');
@@ -76,13 +76,13 @@ class TableroController extends Controller
 
     public function mostrar(Request $request)
     {
-        $fechaSeleccionada = $request->input('fecha', now()->toDateString());
+        $fechaSeleccionada =$request->input('fecha', now()->toDateString());
         return view('tablero.mostrar', compact('fechaSeleccionada'));
     }
 
     public function obtenerDatos(Request $request)
     {
-        $fecha = $request->input('fecha', now()->toDateString());
+        $fecha =$request->input('fecha', now()->toDateString());
 
         $generales = TableroNota::where('tipo', 'general')
             ->latest()
@@ -96,7 +96,7 @@ class TableroController extends Controller
         $pruebasSoftware = TableroNota::where('tipo', 'pruebas_software')
             ->whereDate('fecha', $fecha)
             ->latest()
-            ->get(['id', 'contenido', 'fecha']);
+            ->get(['id', 'titulo', 'contenido', 'fecha']);
 
         return response()->json([
             'generales'       => $generales,

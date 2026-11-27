@@ -27,7 +27,7 @@
                 </p>
             </div>
 
-            <!-- Selector de fecha: centrado debajo en móvil/tablet, fijado a la derecha en pantallas grandes -->
+            <!-- Selector de fecha -->
             <div class="xl:absolute xl:right-6 flex items-center gap-2.5 shrink-0">
                 <label for="filtroFecha" class="text-xs font-medium uppercase tracking-wider text-slate-400">
                     Fecha:
@@ -38,9 +38,9 @@
         </header>
 
         <!-- Contenedor principal en 2 columnas -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
             
-            <!-- Bloque 1: Información General (Fija - 1/3 de pantalla) -->
+            <!-- Bloque 1: Información General -->
             <section class="bg-slate-900/75 backdrop-blur-md border border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl min-w-0">
                 <div class="flex items-center gap-2.5 border-b border-slate-800 pb-3 sm:pb-4 mb-4 sm:mb-5">
                     <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)] shrink-0"></span>
@@ -51,7 +51,7 @@
                 </div>
             </section>
 
-            <!-- Bloque 2: Información del Día Seleccionado (2/3 de pantalla) -->
+            <!-- Bloque 2: Información del Día Seleccionado -->
             <section class="lg:col-span-2 bg-slate-900/75 backdrop-blur-md border border-indigo-500/30 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col min-w-0">
                 <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-3 sm:pb-4 mb-4 sm:mb-5">
                     <div class="flex items-center gap-2.5 min-w-0">
@@ -62,7 +62,7 @@
                         {{ $fechaSeleccionada }}
                     </span>
                 </div>
-                <div id="contenedorFecha" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 flex-1 items-start">
+                <div id="contenedorFecha" class="grid grid-cols-1 gap-3 sm:gap-4 items-stretch">
                     <p class="text-slate-400 text-sm">Cargando...</p>
                 </div>
             </section>
@@ -80,7 +80,7 @@
                     {{ $fechaSeleccionada }}
                 </span>
             </div>
-            <div id="contenedorPruebasSoftware" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-start"></div>
+            <div id="contenedorPruebasSoftware" class="grid grid-cols-1 gap-3 sm:gap-4 items-stretch"></div>
         </section>
     </div>
 
@@ -101,6 +101,17 @@
             }[tag]));
         }
 
+        // Ajusta el tamaño del texto según la cantidad de elementos y longitud del texto
+        function obtenerClasesTexto(totalItems, longitudTexto) {
+            if (totalItems === 1 && longitudTexto < 180) {
+                return 'text-sm sm:text-base xl:text-xl';
+            }
+            if (totalItems <= 2 && longitudTexto < 300) {
+                return 'text-xs sm:text-sm xl:text-lg';
+            }
+            return 'text-xs sm:text-sm xl:text-base';
+        }
+
         async function actualizarTablero() {
             const fecha = inputFecha.value;
             etiquetaFecha.textContent = fecha;
@@ -112,47 +123,80 @@
 
                 ultimaHora.textContent = data.hora;
 
-                // Renderizar Información General (no depende de la fecha)
+                // 1. Renderizar Información General
                 if (data.generales.length === 0) {
                     contenedorGeneral.innerHTML = `<p class="text-slate-500 italic text-sm text-center py-8">Sin avisos generales.</p>`;
                 } else {
-                    contenedorGeneral.innerHTML = data.generales.map(item => `
-                        <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl border-l-4 border-l-amber-400 transition-all duration-200 shadow-md overflow-hidden">
-                            ${item.titulo ? `<h3 class="font-bold text-amber-300 mb-1.5 text-sm sm:text-base xl:text-lg break-words">${escapeHTML(item.titulo)}</h3>` : ''}
-                            <p class="text-slate-200 whitespace-pre-line text-xs sm:text-sm xl:text-base leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
-                        </div>
-                    `).join('');
+                    contenedorGeneral.innerHTML = data.generales.map(item => {
+                        const claseTexto = obtenerClasesTexto(data.generales.length, item.contenido.length);
+                        return `
+                            <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl border-l-4 border-l-amber-400 transition-all duration-200 shadow-md overflow-hidden">
+                                ${item.titulo ? `<h3 class="font-bold text-amber-300 mb-1.5 text-sm sm:text-base xl:text-lg break-words">${escapeHTML(item.titulo)}</h3>` : ''}
+                                <p class="text-slate-200 whitespace-pre-line ${claseTexto} leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
+                            </div>
+                        `;
+                    }).join('');
                 }
 
-                // Renderizar Información Por Fecha (solo del día seleccionado)
-                if (data.porFecha.length === 0) {
+                // 2. Renderizar Información Por Fecha (ajusta columnas según cantidad de elementos)
+                const totalFecha = data.porFecha.length;
+                if (totalFecha === 0) {
+                    contenedorFecha.className = 'grid grid-cols-1 gap-3 sm:gap-4 items-stretch';
                     contenedorFecha.innerHTML = `
-                        <div class="col-span-full flex flex-col items-center justify-center py-12 text-slate-500">
+                        <div class="flex flex-col items-center justify-center py-12 text-slate-500">
                             <svg class="w-12 h-12 mb-3 text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                             </svg>
                             <p class="italic text-sm text-center">No hay información programada para esta fecha.</p>
                         </div>`;
                 } else {
-                    contenedorFecha.innerHTML = data.porFecha.map(item => `
-                        <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl border-l-4 border-l-indigo-400 transition-all duration-200 shadow-md overflow-hidden">
-                            ${item.titulo ? `<h3 class="font-bold text-indigo-300 mb-1.5 text-sm sm:text-base xl:text-lg break-words">${escapeHTML(item.titulo)}</h3>` : ''}
-                            <p class="text-slate-200 whitespace-pre-line text-xs sm:text-sm xl:text-base leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
-                        </div>
-                    `).join('');
+                    contenedorFecha.className = totalFecha === 1
+                        ? 'grid grid-cols-1 gap-3 sm:gap-4 items-stretch'
+                        : 'grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch';
+
+                    contenedorFecha.innerHTML = data.porFecha.map(item => {
+                        const claseTexto = obtenerClasesTexto(totalFecha, item.contenido.length);
+                        return `
+                            <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-4 sm:p-5 rounded-xl border-l-4 border-l-indigo-400 transition-all duration-200 shadow-md overflow-hidden flex flex-col justify-center">
+                                ${item.titulo ? `<h3 class="font-bold text-indigo-300 mb-1.5 text-base sm:text-lg xl:text-xl break-words">${escapeHTML(item.titulo)}</h3>` : ''}
+                                <p class="text-slate-200 whitespace-pre-line ${claseTexto} leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
+                            </div>
+                        `;
+                    }).join('');
                 }
 
-                // Renderizar Pruebas de Software (solo se muestra si hay registros para esa fecha)
-                if (!data.pruebasSoftware || data.pruebasSoftware.length === 0) {
+                // 3. Renderizar Pruebas de Software (oculta si está vacío y ajusta columnas según cantidad)
+                const totalPruebas = data.pruebasSoftware ? data.pruebasSoftware.length : 0;
+                if (totalPruebas === 0) {
                     seccionPruebasSoftware.classList.add('hidden');
                     contenedorPruebasSoftware.innerHTML = '';
                 } else {
                     seccionPruebasSoftware.classList.remove('hidden');
-                    contenedorPruebasSoftware.innerHTML = data.pruebasSoftware.map(item => `
-                        <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-3.5 sm:p-4 rounded-xl border-l-4 border-l-emerald-400 transition-all duration-200 shadow-md overflow-hidden">
-                            <p class="text-slate-200 whitespace-pre-line text-xs sm:text-sm xl:text-base leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
-                        </div>
-                    `).join('');
+
+                    if (totalPruebas === 1) {
+                        contenedorPruebasSoftware.className = 'grid grid-cols-1 gap-3 sm:gap-4 items-stretch';
+                    } else if (totalPruebas === 2) {
+                        contenedorPruebasSoftware.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch';
+                    } else {
+                        contenedorPruebasSoftware.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-stretch';
+                    }
+
+                    contenedorPruebasSoftware.innerHTML = data.pruebasSoftware.map(item => {
+                        const claseTexto = obtenerClasesTexto(totalPruebas, item.contenido.length);
+                        return `
+                            <div class="bg-slate-950/70 hover:bg-slate-950 border border-slate-800/80 p-4 sm:p-5 rounded-xl border-l-4 border-l-emerald-400 transition-all duration-200 shadow-md overflow-hidden flex flex-col justify-between gap-2.5">
+                                ${item.titulo ? `
+                                    <div class="flex items-center gap-2 text-emerald-300 font-bold text-sm sm:text-base xl:text-lg">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                        <span class="break-words">Profesor: ${escapeHTML(item.titulo)}</span>
+                                    </div>
+                                ` : ''}
+                                <p class="text-slate-200 whitespace-pre-line ${claseTexto} leading-relaxed break-words">${escapeHTML(item.contenido)}</p>
+                            </div>
+                        `;
+                    }).join('');
                 }
             } catch (error) {
                 console.error('Error al actualizar el tablero:', error);

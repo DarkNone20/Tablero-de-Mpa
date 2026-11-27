@@ -70,7 +70,7 @@
                     </div>
 
                     <div id="campoTitulo">
-                        <label for="inputTitulo" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
+                        <label id="labelTituloCrear" for="inputTitulo" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
                             Título
                         </label>
                         <input type="text" id="inputTitulo" name="titulo" placeholder="Ej. Turno mañana / Aviso"
@@ -98,7 +98,7 @@
             </form>
         </section>
 
-        <!-- Barra de filtro global de fecha para las secciones diarias -->
+        <!-- Barra de filtro global de fecha -->
         <div class="flex flex-wrap justify-between items-center gap-3 bg-slate-900/50 border border-slate-800/80 px-5 py-3 rounded-2xl mb-6">
             <span class="text-xs font-medium uppercase tracking-wider text-slate-400">
                 Mostrando programación y pruebas del día:
@@ -138,12 +138,10 @@
                                 <p class="text-sm text-slate-200 whitespace-pre-line leading-relaxed">{{ $item->contenido }}</p>
                             </div>
                             <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" onclick="event.stopPropagation()" class="shrink-0">
-                                @csrf @method('DELETE')
+                                @csrf
+                                @method('DELETE')
                                 <button type="submit"
                                         class="inline-flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/50 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                    </svg>
                                     <span>Eliminar</span>
                                 </button>
                             </form>
@@ -183,21 +181,16 @@
                                 <p class="text-sm text-slate-200 whitespace-pre-line leading-relaxed">{{ $item->contenido }}</p>
                             </div>
                             <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" onclick="event.stopPropagation()" class="shrink-0">
-                                @csrf @method('DELETE')
+                                @csrf
+                                @method('DELETE')
                                 <button type="submit"
                                         class="inline-flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/50 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                    </svg>
                                     <span>Eliminar</span>
                                 </button>
                             </form>
                         </div>
                     @empty
                         <div class="flex flex-col items-center justify-center py-10 text-slate-500">
-                            <svg class="w-10 h-10 mb-2.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                            </svg>
                             <p class="text-sm italic text-center">No hay registros para el {{ $fechaSeleccionada }}.</p>
                         </div>
                     @endforelse
@@ -218,31 +211,31 @@
                     @forelse($pruebasSoftware as $item)
                         <div onclick="abrirModalEditar(this)"
                              data-id="{{ $item->id }}"
-                             data-titulo=""
+                             data-titulo="{{ $item->titulo }}"
                              data-contenido="{{ $item->contenido }}"
                              data-tipo="pruebas_software"
                              data-fecha="{{ $item->fecha }}"
                              title="Haz clic para editar"
                              class="group cursor-pointer bg-slate-950/70 hover:bg-slate-900/90 border border-slate-800/80 hover:border-emerald-500/40 p-4 rounded-xl border-l-4 border-l-emerald-400 flex justify-between items-start gap-3 transition-all duration-200 shadow-md">
                             <div class="min-w-0 flex-1">
+                                @if($item->titulo)
+                                    <p class="font-bold text-emerald-300 group-hover:text-emerald-200 text-sm mb-1 transition-colors">
+                                        Prof. {{ $item->titulo }}
+                                    </p>
+                                @endif
                                 <p class="text-sm text-slate-200 whitespace-pre-line leading-relaxed">{{ $item->contenido }}</p>
                             </div>
                             <form action="{{ route('tablero.eliminar', $item->id) }}" method="POST" onclick="event.stopPropagation()" class="shrink-0">
-                                @csrf @method('DELETE')
+                                @csrf
+                                @method('DELETE')
                                 <button type="submit"
                                         class="inline-flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/25 hover:border-red-500/50 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                    </svg>
                                     <span>Eliminar</span>
                                 </button>
                             </form>
                         </div>
                     @empty
                         <div class="flex flex-col items-center justify-center py-10 text-slate-500">
-                            <svg class="w-10 h-10 mb-2.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
-                            </svg>
                             <p class="text-sm italic text-center">No hay pruebas de software para el {{ $fechaSeleccionada }}.</p>
                         </div>
                     @endforelse
@@ -292,8 +285,8 @@
                     </div>
                 </div>
 
-                <div id="editCampoTitulo">
-                    <label for="editTitulo" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
+                <div>
+                    <label id="labelTituloEditar" for="editTitulo" class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">
                         Título
                     </label>
                     <input type="text" name="titulo" id="editTitulo" placeholder="Ej. Turno mañana / Aviso"
@@ -325,8 +318,18 @@
     <script>
         function toggleCamposCrear() {
             const tipo = document.getElementById('tipoSelector').value;
+            const labelTitulo = document.getElementById('labelTituloCrear');
+            const inputTitulo = document.getElementById('inputTitulo');
+
             document.getElementById('campoFecha').style.display = (tipo === 'general') ? 'none' : 'block';
-            document.getElementById('campoTitulo').style.display = (tipo === 'pruebas_software') ? 'none' : 'block';
+
+            if (tipo === 'pruebas_software') {
+                labelTitulo.textContent = 'Nombre del Profesor';
+                inputTitulo.placeholder = 'Ej. Ing. Carlos Mendoza';
+            } else {
+                labelTitulo.textContent = 'Título';
+                inputTitulo.placeholder = 'Ej. Turno mañana / Aviso';
+            }
         }
         toggleCamposCrear();
 
@@ -335,13 +338,20 @@
         const editTipo = document.getElementById('editTipo');
         const editFecha = document.getElementById('editFecha');
         const editCampoFecha = document.getElementById('editCampoFecha');
-        const editCampoTitulo = document.getElementById('editCampoTitulo');
+        const labelTituloEditar = document.getElementById('labelTituloEditar');
         const editTitulo = document.getElementById('editTitulo');
         const editContenido = document.getElementById('editContenido');
 
         function toggleCamposEditar() {
             editCampoFecha.style.display = (editTipo.value === 'general') ? 'none' : 'block';
-            editCampoTitulo.style.display = (editTipo.value === 'pruebas_software') ? 'none' : 'block';
+
+            if (editTipo.value === 'pruebas_software') {
+                labelTituloEditar.textContent = 'Nombre del Profesor';
+                editTitulo.placeholder = 'Ej. Ing. Carlos Mendoza';
+            } else {
+                labelTituloEditar.textContent = 'Título';
+                editTitulo.placeholder = 'Ej. Turno mañana / Aviso';
+            }
         }
 
         function abrirModalEditar(elemento) {
